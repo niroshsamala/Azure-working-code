@@ -1,1 +1,29 @@
 # Test file
+# Create Network Security Group and inbound rule
+resource "azurerm_network_security_group" "LBC-DLZ-wind-nsg1" {
+  name                = "LBC-DLZ-wind-nsg1"
+  location            = azurerm_resource_group.LBC-DLZ-rg.location
+  resource_group_name = azurerm_resource_group.LBC-DLZ-rg.name
+
+  security_rule {
+    name                       = "RDP"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  tags = {
+      environment = "Windows nsg"
+  }
+}
+
+# Connect the security group to the network interface
+resource "azurerm_network_interface_security_group_association" "association" {
+  network_interface_id      = azurerm_network_interface.LBC-DLZ-nic-1.id
+  network_security_group_id = azurerm_network_security_group.LBC-DLZ-wind-nsg1.id
+}
